@@ -1,0 +1,11 @@
+node_modules
+dist
+.next
+out
+build
+coverage
+*.tsbuildinfo
+bun.lock
+package-lock.json
+backend/prisma/migrations
+frontend/next-env.d.ts
