@@ -1,4 +1,5 @@
 import "@mantine/core/styles.css";
+import "./globals.css";
 
 import type { Metadata } from "next";
 import type { ReactNode } from "react";
@@ -20,6 +21,7 @@ export const metadata: Metadata = {
 
 const theme = createTheme({
 	primaryColor: "dartmouth",
+	cursorType: "pointer",
 	colors: {
 		dartmouth: [
 			"#e6f4ec",
