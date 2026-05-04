@@ -1,20 +1,24 @@
 "use client";
-import Link from "next/link";
-import { Button, Stack, Text, Title } from "@mantine/core";
+import { useRouter } from "next/navigation";
+import { useEffect } from "react";
+import { Stack, Text, Title } from "@mantine/core";
 import { useAuth } from "@/components/AuthProvider";
 import { PreferencesForm } from "@/components/PreferencesForm";
 
 export default function PortalPage() {
-	const { token, me } = useAuth();
+	const router = useRouter();
+	const { token, me, loading } = useAuth();
 
-	if (!token || !me) {
+	useEffect(() => {
+		if (!loading && (!token || !me)) router.replace("/");
+	}, [loading, me, router, token]);
+
+	if (loading || !token || !me) {
 		return (
 			<Stack gap="md">
-				<Title order={1}>Sign in from home</Title>
-				<Text>Use the Google sign-in button on the home page to manage your subscription.</Text>
-				<Button component={Link} href="/" size="md" w="fit-content">
-					Go home
-				</Button>
+				<Text size="sm" c="dimmed">
+					Redirecting...
+				</Text>
 			</Stack>
 		);
 	}

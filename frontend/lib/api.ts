@@ -10,10 +10,24 @@ export type Preferences = {
 
 export type Me = { email: string; name: string | null; preferences: Preferences };
 
+class ApiError extends Error {
+	constructor(
+		message: string,
+		readonly code: string | null,
+	) {
+		super(message);
+		this.name = "ApiError";
+	}
+}
+
 const API_ERROR_MESSAGES: Record<string, string> = {
 	ERR_DARTMOUTH_EMAIL_REQUIRED: "Please sign in with a @dartmouth.edu Google account.",
 	ERR_UNAUTHORIZED: "Sign-in expired or could not be verified.",
 };
+
+export function isUnauthorizedError(error: unknown) {
+	return error instanceof ApiError && error.code === "ERR_UNAUTHORIZED";
+}
 
 async function request<T>(path: string, token: string, init: RequestInit = {}): Promise<T> {
 	const res = await fetch(`${API_URL}${path}`, {
@@ -26,13 +40,17 @@ async function request<T>(path: string, token: string, init: RequestInit = {}): 
 	});
 	if (!res.ok) {
 		let message = `${res.status} ${res.statusText}`;
+		let code: string | null = null;
 		try {
 			const body = (await res.json()) as { error?: string };
-			if (body.error) message = API_ERROR_MESSAGES[body.error] ?? body.error;
+			if (body.error) {
+				code = body.error;
+				message = API_ERROR_MESSAGES[body.error] ?? body.error;
+			}
 		} catch {
 			// Keep the HTTP status message when the response is not JSON.
 		}
-		throw new Error(message);
+		throw new ApiError(message, code);
 	}
 	return (await res.json()) as T;
 }

@@ -1,9 +1,8 @@
 "use client";
 
-import Link from "next/link";
 import { useRouter } from "next/navigation";
-import { useCallback } from "react";
-import { Alert, Button, Stack, Text, Title } from "@mantine/core";
+import { useCallback, useEffect } from "react";
+import { Alert, Stack, Text, Title } from "@mantine/core";
 import { GoogleSignIn } from "@/components/GoogleSignIn";
 import { useAuth } from "@/components/AuthProvider";
 
@@ -11,13 +10,27 @@ export default function Home() {
 	const router = useRouter();
 	const { me, loading, error, signIn } = useAuth();
 
+	useEffect(() => {
+		if (me) router.replace("/portal");
+	}, [me, router]);
+
 	const handleToken = useCallback(
 		async (token: string) => {
 			const ok = await signIn(token);
-			if (ok) router.push("/portal");
+			if (ok) router.replace("/portal");
 		},
 		[router, signIn],
 	);
+
+	if (me || loading) {
+		return (
+			<Stack gap="md">
+				<Text size="sm" c="dimmed">
+					{me ? "Redirecting..." : "Loading..."}
+				</Text>
+			</Stack>
+		);
+	}
 
 	return (
 		<Stack gap="md">
@@ -38,27 +51,19 @@ export default function Home() {
 				. Pick which meals you want — breakfast, lunch, or dinner — and we'll send the day's options
 				to your inbox.
 			</Text>
-			{me ? (
-				<Button component={Link} href="/portal" size="md" w="fit-content">
-					Open the portal →
-				</Button>
-			) : (
-				<>
-					<Text size="sm" c="dimmed">
-						Sign in with your @dartmouth.edu Google account.
-					</Text>
-					<GoogleSignIn onToken={handleToken} />
-					{loading && (
-						<Text size="sm" c="dimmed">
-							Signing in…
-						</Text>
-					)}
-					{error && (
-						<Alert color="red" variant="light">
-							{error}
-						</Alert>
-					)}
-				</>
+			<Text size="sm" c="dimmed">
+				Sign in with your @dartmouth.edu Google account.
+			</Text>
+			<GoogleSignIn onToken={handleToken} />
+			{loading && (
+				<Text size="sm" c="dimmed">
+					Signing in…
+				</Text>
+			)}
+			{error && (
+				<Alert color="red" variant="light">
+					{error}
+				</Alert>
 			)}
 		</Stack>
 	);
