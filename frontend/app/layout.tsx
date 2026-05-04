@@ -14,7 +14,7 @@ import { AuthProvider } from "@/components/AuthProvider";
 import { GOOGLE_CLIENT_ID } from "@/lib/env";
 
 export const metadata: Metadata = {
-	title: "Dartmouth Dining Subscriptions",
+	title: "Dartmouth Hugh",
 	description: "Daily emails of the FoCo / Collis / Hop menu.",
 };
 

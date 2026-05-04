@@ -21,7 +21,7 @@ export default function Home() {
 
 	return (
 		<Stack gap="md">
-			<Title order={1}>Dartmouth Dining Subscriptions</Title>
+			<Title order={1}>Dartmouth Hugh</Title>
 			<Text>
 				Get a daily email with the menu at{" "}
 				<Text span fw={700}>

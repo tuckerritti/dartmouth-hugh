@@ -21,7 +21,7 @@ export default function PortalPage() {
 				<Paper withBorder radius="md" p="lg">
 					<Stack gap="md">
 						<Title order={1} size="h2">
-							Sign in from home
+							Dartmouth Hugh
 						</Title>
 						<Text c="dimmed">
 							Use the Google sign-in button on the home page to manage your dining emails.
@@ -39,9 +39,7 @@ export default function PortalPage() {
 	return (
 		<Stack gap="lg">
 			<Stack gap={4}>
-				<Title order={1} size="h2">
-					Dining emails
-				</Title>
+				<Title order={1}>Dartmouth Hugh</Title>
 				<Text c="dimmed">
 					Manage daily breakfast, lunch, and dinner emails for FoCo, Collis, and the Hop.
 				</Text>
