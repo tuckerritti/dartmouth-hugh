@@ -1,7 +1,7 @@
 "use client";
 import { useRouter } from "next/navigation";
 import { useEffect } from "react";
-import { Group, Paper, Stack, Text, Title } from "@mantine/core";
+import { Button, Group, Paper, Stack, Text, Title } from "@mantine/core";
 import { useAuth } from "@/components/AuthProvider";
 import { PreferencesForm } from "@/components/PreferencesForm";
 
@@ -15,11 +15,16 @@ function PortalCredit() {
 
 export default function PortalPage() {
 	const router = useRouter();
-	const { token, me, loading } = useAuth();
+	const { token, me, loading, signOut } = useAuth();
 
 	useEffect(() => {
 		if (!loading && (!token || !me)) router.replace("/");
 	}, [loading, me, router, token]);
+
+	function handleSignOut() {
+		signOut();
+		router.replace("/");
+	}
 
 	if (loading || !token || !me) {
 		return (
@@ -55,6 +60,9 @@ export default function PortalPage() {
 								</Text>
 							)}
 						</Stack>
+						<Button variant="light" color="gray" onClick={handleSignOut}>
+							Sign out
+						</Button>
 					</Group>
 					<PreferencesForm token={token} initial={me.preferences} />
 				</Stack>
