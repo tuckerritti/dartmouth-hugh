@@ -2,6 +2,7 @@
 import { useRouter } from "next/navigation";
 import { useEffect } from "react";
 import { Button, Group, Paper, Stack, Text, Title } from "@mantine/core";
+import { LogOut } from "lucide-react";
 import { useAuth } from "@/components/AuthProvider";
 import { PreferencesForm } from "@/components/PreferencesForm";
 
@@ -60,7 +61,13 @@ export default function PortalPage() {
 								</Text>
 							)}
 						</Stack>
-						<Button variant="light" color="gray" onClick={handleSignOut}>
+						<Button
+							variant="light"
+							color="gray"
+							c="black"
+							leftSection={<LogOut size={16} aria-hidden="true" />}
+							onClick={handleSignOut}
+						>
 							Sign out
 						</Button>
 					</Group>
