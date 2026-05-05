@@ -1,0 +1,27 @@
+:where(
+	a[href],
+	button,
+	input[type="button"],
+	input[type="checkbox"],
+	input[type="radio"],
+	input[type="reset"],
+	input[type="submit"],
+	label[for],
+	select,
+	summary,
+	[role="button"],
+	[role="link"]
+) {
+	cursor: pointer;
+}
+
+:where(
+	button,
+	input,
+	select,
+	[role="button"],
+	[role="link"]
+):disabled,
+:where([aria-disabled="true"]) {
+	cursor: not-allowed;
+}

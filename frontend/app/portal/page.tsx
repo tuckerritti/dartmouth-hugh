@@ -40,9 +40,7 @@ export default function PortalPage() {
 	return (
 		<Stack gap="lg">
 			<Stack gap={4}>
-				<Title order={1} size="h2">
-					Dining emails
-				</Title>
+				<Title order={1}>Dartmouth Hugh</Title>
 				<Text c="dimmed">
 					Manage daily breakfast, lunch, and dinner emails for FoCo, Collis, and the Hop.
 				</Text>
