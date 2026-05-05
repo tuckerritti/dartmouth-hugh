@@ -9,6 +9,7 @@ import {
 	useState,
 	type ReactNode,
 } from "react";
+import { googleLogout } from "@react-oauth/google";
 import { api, isUnauthorizedError, type Me } from "@/lib/api";
 
 type AuthContextValue = {
@@ -35,6 +36,7 @@ export function AuthProvider({ children }: { children: ReactNode }) {
 	const [error, setError] = useState<string | null>(null);
 
 	const signOut = useCallback(() => {
+		googleLogout();
 		clearStoredToken();
 		setToken(null);
 		setMe(null);
