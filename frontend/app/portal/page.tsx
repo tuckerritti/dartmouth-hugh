@@ -31,7 +31,7 @@ export default function PortalPage() {
 		return (
 			<Stack gap="lg">
 				<Text size="sm" c="dimmed">
-					Redirecting...
+					{loading ? "Loading..." : "Redirecting..."}
 				</Text>
 			</Stack>
 		);
