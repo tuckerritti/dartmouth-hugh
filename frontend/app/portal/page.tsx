@@ -1,6 +1,8 @@
 "use client";
-import Link from "next/link";
+import { useRouter } from "next/navigation";
+import { useEffect } from "react";
 import { Button, Group, Paper, Stack, Text, Title } from "@mantine/core";
+import { LogOut } from "lucide-react";
 import { useAuth } from "@/components/AuthProvider";
 import { PreferencesForm } from "@/components/PreferencesForm";
 
@@ -13,25 +15,24 @@ function PortalCredit() {
 }
 
 export default function PortalPage() {
-	const { token, me } = useAuth();
+	const router = useRouter();
+	const { token, me, loading, signOut } = useAuth();
 
-	if (!token || !me) {
+	useEffect(() => {
+		if (!loading && (!token || !me)) router.replace("/");
+	}, [loading, me, router, token]);
+
+	function handleSignOut() {
+		signOut();
+		router.replace("/");
+	}
+
+	if (loading || !token || !me) {
 		return (
 			<Stack gap="lg">
-				<Paper withBorder radius="md" p="lg">
-					<Stack gap="md">
-						<Title order={1} size="h2">
-							Dartmouth Hugh
-						</Title>
-						<Text c="dimmed">
-							Use the Google sign-in button on the home page to manage your dining emails.
-						</Text>
-						<Button component={Link} href="/" size="md" w="fit-content">
-							Go home
-						</Button>
-					</Stack>
-				</Paper>
-				<PortalCredit />
+				<Text size="sm" c="dimmed">
+					{loading ? "Loading..." : "Redirecting..."}
+				</Text>
 			</Stack>
 		);
 	}
@@ -58,6 +59,15 @@ export default function PortalPage() {
 								</Text>
 							)}
 						</Stack>
+						<Button
+							variant="light"
+							color="gray"
+							c="black"
+							leftSection={<LogOut size={16} aria-hidden="true" />}
+							onClick={handleSignOut}
+						>
+							Sign out
+						</Button>
 					</Group>
 					<PreferencesForm token={token} initial={me.preferences} />
 				</Stack>

@@ -1,7 +1,8 @@
 "use client";
 import { useState } from "react";
 import { Alert, Divider, Group, Stack, Switch, Text } from "@mantine/core";
-import { api, type Preferences } from "@/lib/api";
+import { useAuth } from "@/components/AuthProvider";
+import { api, isUnauthorizedError, type Preferences } from "@/lib/api";
 
 type Props = { token: string; initial: Preferences };
 type PreferenceKey = keyof Omit<Preferences, "email">;
@@ -14,6 +15,7 @@ const MEALS: { key: MealKey; label: string; time: string }[] = [
 ];
 
 export function PreferencesForm({ token, initial }: Props) {
+	const { signOut } = useAuth();
 	const [prefs, setPrefs] = useState(initial);
 	const [savingKey, setSavingKey] = useState<PreferenceKey | null>(null);
 	const [savedAt, setSavedAt] = useState<Date | null>(null);
@@ -36,6 +38,10 @@ export function PreferencesForm({ token, initial }: Props) {
 			setPrefs(updated);
 			setSavedAt(new Date());
 		} catch (e) {
+			if (isUnauthorizedError(e)) {
+				signOut();
+				return;
+			}
 			setPrefs(previous);
 			setError(e instanceof Error ? e.message : "Could not save preferences");
 		} finally {
