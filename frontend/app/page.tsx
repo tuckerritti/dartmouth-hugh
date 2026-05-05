@@ -55,11 +55,6 @@ export default function Home() {
 				Sign in with your @dartmouth.edu Google account.
 			</Text>
 			<GoogleSignIn onToken={handleToken} />
-			{loading && (
-				<Text size="sm" c="dimmed">
-					Signing in…
-				</Text>
-			)}
 			{error && (
 				<Alert color="red" variant="light">
 					{error}
