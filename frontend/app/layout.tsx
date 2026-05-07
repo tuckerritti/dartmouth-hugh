@@ -16,7 +16,7 @@ import { GOOGLE_CLIENT_ID } from "@/lib/env";
 
 export const metadata: Metadata = {
 	title: "Dartmouth Hugh",
-	description: "Daily emails of the FoCo / Collis / Hop menu.",
+	description: "Daily emails of the FoCo / Collis menu.",
 };
 
 const theme = createTheme({

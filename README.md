@@ -1,6 +1,6 @@
 # Dartmouth Dining Email Subscription Portal
 
-A web app that lets Dartmouth students subscribe to daily emails of the breakfast, lunch, and dinner menus at FoCo, Collis, and the Hop.
+A web app that lets Dartmouth students subscribe to daily emails of the breakfast, lunch, and dinner menus at FoCo and Collis.
 
 > DALI Lab API Challenge submission. Combines three integrations: the **Dartmouth Dining API**, **Google OAuth**, and **Gmail SMTP**.
 
