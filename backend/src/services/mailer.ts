@@ -34,7 +34,7 @@ function dateLabelFor(date: Date): string {
 		weekday: "long",
 		month: "long",
 		day: "numeric",
-		timeZone: "America/New_York",
+		timeZone: config.TIMEZONE,
 	});
 }
 

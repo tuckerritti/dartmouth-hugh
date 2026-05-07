@@ -11,6 +11,8 @@ const schema = z.object({
 
 	GMAIL_USER: z.email(),
 	GMAIL_APP_PASSWORD: z.string().min(1),
+
+	TIMEZONE: z.string().min(1).default("America/New_York"),
 });
 
 const parsed = schema.safeParse(process.env);
@@ -22,5 +24,4 @@ if (!parsed.success) {
 export default {
 	...parsed.data,
 	PRODUCTION: parsed.data.NODE_ENV === "production",
-	TIMEZONE: "America/New_York",
 };
