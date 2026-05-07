@@ -39,14 +39,10 @@ export default function Home() {
 				Get a daily email with the menu at{" "}
 				<Text span fw={700}>
 					FoCo
-				</Text>
-				,{" "}
+				</Text>{" "}
+				and{" "}
 				<Text span fw={700}>
 					Collis
-				</Text>
-				, and the{" "}
-				<Text span fw={700}>
-					Hop
 				</Text>
 				. Pick which meals you want — breakfast, lunch, or dinner — and we'll send the day's options
 				to your inbox.
