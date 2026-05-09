@@ -2,18 +2,20 @@ import cron from "node-cron";
 import * as Sentry from "@sentry/bun";
 import config from "../config";
 import { getSubscribers } from "../database";
-import { fetchDailyMenus } from "./dining";
+import { fetchDailyMenus, MEALS } from "./dining";
 import { sendDailyDigestEmail } from "./mailer";
 
 /**
  * Run the daily digest end-to-end: fetch subscribers, fetch all menus, send.
  * Returns the number of recipients the email was sent to (0 if skipped).
  */
-export async function runDailyDigest(date: Date = new Date()): Promise<{ sent: number }> {
+export async function runDailyDigest(): Promise<{ sent: number }> {
 	const recipients = await getSubscribers();
 	if (recipients.length === 0) return { sent: 0 };
 
+	const date = new Date();
 	const menus = await fetchDailyMenus(date);
+	if (!MEALS.some((meal) => Object.keys(menus[meal]).length > 0)) return { sent: 0 };
 
 	await sendDailyDigestEmail(menus, recipients, date);
 	return { sent: recipients.length };
