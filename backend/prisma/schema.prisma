@@ -19,9 +19,6 @@ model User {
 model Preferences {
   email      String   @id
   subscribed Boolean  @default(false)
-  breakfast  Boolean  @default(false)
-  lunch      Boolean  @default(false)
-  dinner     Boolean  @default(false)
   updatedAt  DateTime @updatedAt @map("updated_at")
   user       User     @relation(fields: [email], references: [email], onDelete: Cascade)
 

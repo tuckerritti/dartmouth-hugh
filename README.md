@@ -1,6 +1,6 @@
 # Dartmouth Dining Email Subscription Portal
 
-A web app that lets Dartmouth students subscribe to daily emails of the breakfast, lunch, and dinner menus at FoCo and Collis.
+A web app that lets Dartmouth students subscribe to a daily morning email with the breakfast, lunch, and dinner menus at FoCo and Collis.
 
 > DALI Lab API Challenge submission. Combines three integrations: the **Dartmouth Dining API**, **Google OAuth**, and **Gmail SMTP**.
 
@@ -40,7 +40,7 @@ createdb dartmouth_hugh
 
 # 4. Configure backend
 cp backend/.env.example backend/.env
-# Fill in DATABASE_URL, GOOGLE_CLIENT_ID, GMAIL_USER, GMAIL_APP_PASSWORD, FRONTEND_ORIGIN
+# Fill in DATABASE_URL, GOOGLE_CLIENT_ID, GMAIL_USER, GMAIL_APP_PASSWORD, EMAIL_SEND_CRON, FRONTEND_ORIGIN
 
 # 5. Apply Prisma migrations
 cd backend
@@ -72,7 +72,7 @@ Backend listens on `:4000`, frontend on `:3000`.
 - **Backend**: Bun + Express + TypeScript, single instance. Layered like `xrds-signout-backend` (`app.ts` / `config.ts` / `database.ts` / `routes.ts` + `controllers/` + `middleware/` + `services/`).
 - **Database**: Postgres via **Prisma**. Schema in `backend/prisma/schema.prisma`; migrations under `backend/prisma/migrations/`.
 - **Auth**: in-memory only — Google ID token sent as `Authorization: Bearer` on every request, verified server-side, and restricted to verified `@dartmouth.edu` accounts. No cookies, no sessions.
-- **Scheduler**: `node-cron` jobs at 07:00 / 11:00 / 17:00 ET fetch the menu and send one email per meal with subscribers in BCC.
+- **Scheduler**: one `node-cron` job, configured by `EMAIL_SEND_CRON` and run in ET, fetches breakfast, lunch, and dinner menus and sends one daily digest email with subscribers in BCC.
 
 ## Learning Journey
 

@@ -27,19 +27,17 @@ export async function getPreferences(email: string): Promise<Preferences | null>
  */
 export async function updatePreferences(
 	email: string,
-	prefs: Pick<Preferences, "subscribed" | "breakfast" | "lunch" | "dinner">,
+	prefs: Pick<Preferences, "subscribed">,
 ): Promise<Preferences> {
 	return prisma.preferences.update({ where: { email }, data: prefs });
 }
 
-export type MealColumn = "breakfast" | "lunch" | "dinner";
-
 /**
- * List the email addresses subscribed to a particular meal.
+ * List the email addresses subscribed to the daily digest.
  */
-export async function getSubscribersFor(meal: MealColumn): Promise<string[]> {
+export async function getSubscribers(): Promise<string[]> {
 	const rows = await prisma.preferences.findMany({
-		where: { subscribed: true, [meal]: true },
+		where: { subscribed: true },
 		select: { email: true },
 	});
 	return rows.map((r) => r.email);

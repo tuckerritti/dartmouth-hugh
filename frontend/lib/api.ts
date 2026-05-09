@@ -3,9 +3,6 @@ import { API_URL } from "./env";
 export type Preferences = {
 	email: string;
 	subscribed: boolean;
-	breakfast: boolean;
-	lunch: boolean;
-	dinner: boolean;
 };
 
 export type Me = { email: string; name: string | null; preferences: Preferences };

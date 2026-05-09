@@ -4,9 +4,6 @@ import { getPreferences, updatePreferences } from "../database";
 
 const PreferencesBody = z.object({
 	subscribed: z.boolean(),
-	breakfast: z.boolean(),
-	lunch: z.boolean(),
-	dinner: z.boolean(),
 });
 
 /**
