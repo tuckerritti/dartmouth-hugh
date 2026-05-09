@@ -81,6 +81,13 @@ function stationAllowed(location: string, station: string): boolean {
 	return location === FOCO_LOCATION && FOCO_STATIONS.has(station);
 }
 
+function isEntreeCandidate(item: RawItem): boolean {
+	if (!INCLUDED_CATEGORIES.has(item.menuCategory)) return false;
+	if (item.recipeCategory.some((category) => EXCLUDED_RECIPE_CATEGORIES.has(category))) return false;
+	if (COMPONENT_PICKER.test(item.itemName)) return false;
+	return true;
+}
+
 function titleCase(value: string): string {
 	return value.toLowerCase().replace(/\b\w/g, (char) => char.toUpperCase());
 }
@@ -89,48 +96,44 @@ function sortStrings(a: string, b: string): number {
 	return a.localeCompare(b, "en-US");
 }
 
+function getOrInit<K, V>(map: Map<K, V>, key: K, init: () => V): V {
+	let value = map.get(key);
+	if (value === undefined) {
+		value = init();
+		map.set(key, value);
+	}
+	return value;
+}
+
+type StationGroup = { items: Set<string>; headers: Set<string> };
+
 function buildMenuForMeal(items: RawItem[], meal: Meal, date: string): MenuByVenue {
-	const wantMeal = MEAL_LABEL[meal];
-	const grouped = new Map<
-		string,
-		Map<string, { realItems: Set<string>; headerItems: Set<string> }>
-	>();
+	const mealLabel = MEAL_LABEL[meal];
+	const grouped = new Map<string, Map<string, StationGroup>>();
 
 	for (const item of items) {
-		if (!INCLUDED_CATEGORIES.has(item.menuCategory)) continue;
-		if (item.recipeCategory.some((category) => EXCLUDED_RECIPE_CATEGORIES.has(category))) {
-			continue;
-		}
-		if (COMPONENT_PICKER.test(item.itemName)) continue;
-
+		if (!isEntreeCandidate(item)) continue;
 		const isHeader = item.recipeCategory.includes("Menu Header");
+
 		for (const availability of item.datesAvailable) {
 			if (availability.date !== date) continue;
 
 			for (const menu of availability.menus) {
-				if (menu.mealPeriod !== wantMeal) continue;
+				if (menu.mealPeriod !== mealLabel) continue;
 				if (!stationAllowed(item.mainLocationLabel, menu.subLocation)) continue;
 
-				const stations =
-					grouped.get(item.mainLocationLabel) ??
-					new Map<string, { realItems: Set<string>; headerItems: Set<string> }>();
-				const station = stations.get(menu.subLocation) ?? {
-					realItems: new Set<string>(),
-					headerItems: new Set<string>(),
-				};
-
-				if (isHeader) {
-					station.headerItems.add(item.itemName);
-				} else {
-					station.realItems.add(item.itemName);
-				}
-
-				stations.set(menu.subLocation, station);
-				grouped.set(item.mainLocationLabel, stations);
+				const stations = getOrInit(grouped, item.mainLocationLabel, () => new Map());
+				const group = getOrInit(stations, menu.subLocation, () => ({
+					items: new Set(),
+					headers: new Set(),
+				}));
+				(isHeader ? group.headers : group.items).add(item.itemName);
 			}
 		}
 	}
 
+	// Some stations publish only a "Menu Header" placeholder (e.g. "PASTA BAR")
+	// instead of itemized dishes. Fall back to those — title-cased — when no real items exist.
 	const menu: MenuByVenue = {};
 	for (const location of [...grouped.keys()].sort(sortStrings)) {
 		const stations = grouped.get(location)!;
@@ -138,12 +141,9 @@ function buildMenuForMeal(items: RawItem[], meal: Meal, date: string): MenuByVen
 
 		for (const station of [...stations.keys()].sort(sortStrings)) {
 			const group = stations.get(station)!;
-			const items =
-				group.realItems.size > 0
-					? [...group.realItems]
-					: [...group.headerItems].map((item) => titleCase(item));
-
-			menu[location][station] = items.sort(sortStrings);
+			const names =
+				group.items.size > 0 ? [...group.items] : [...group.headers].map(titleCase);
+			menu[location][station] = names.sort(sortStrings);
 		}
 	}
 
