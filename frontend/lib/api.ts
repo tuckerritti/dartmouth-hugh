@@ -19,6 +19,7 @@ class ApiError extends Error {
 
 const API_ERROR_MESSAGES: Record<string, string> = {
 	ERR_DARTMOUTH_EMAIL_REQUIRED: "Please sign in with a @dartmouth.edu Google account.",
+	ERR_500_INTERNAL_ERROR: "Something went wrong on the server. Please try again.",
 	ERR_UNAUTHORIZED: "Sign-in expired or could not be verified.",
 };
 

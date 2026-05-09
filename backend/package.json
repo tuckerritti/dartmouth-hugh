@@ -4,8 +4,8 @@
 	"private": true,
 	"main": "src/app.ts",
 	"scripts": {
-		"dev": "bun --watch src/app.ts",
-		"start": "bun src/app.ts",
+		"dev": "bun --preload ./src/instrument.ts --watch src/app.ts",
+		"start": "bun --preload ./src/instrument.ts src/app.ts",
 		"typecheck": "tsc --noEmit",
 		"lint": "eslint .",
 		"format": "prettier --write .",
@@ -16,6 +16,7 @@
 	},
 	"dependencies": {
 		"@prisma/client": "^6.18.1",
+		"@sentry/bun": "10.52.0",
 		"cors": "^2.8.5",
 		"express": "^5.1.0",
 		"google-auth-library": "^10.4.0",

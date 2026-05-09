@@ -1,4 +1,5 @@
 import cron from "node-cron";
+import * as Sentry from "@sentry/bun";
 import config from "../config";
 import { getSubscribers } from "../database";
 import { fetchDailyMenus } from "./dining";
@@ -30,6 +31,14 @@ export function startScheduler(): void {
 
 				console.log(`[cron] daily digest: sent to ${sent} recipients`);
 			} catch (err) {
+				Sentry.captureException(err, {
+					tags: {
+						job: "daily-digest-email",
+					},
+				});
+				Sentry.logger.error("cron daily digest failed", {
+					job: "daily-digest-email",
+				});
 				console.error("[cron] daily digest failed", err);
 			}
 		},

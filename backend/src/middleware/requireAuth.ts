@@ -16,25 +16,30 @@ export default async function requireAuth(req: Request, res: Response, next: Nex
 
 	const idToken = header.slice("Bearer ".length);
 
+	let ticket;
 	try {
-		const ticket = await client.verifyIdToken({
+		ticket = await client.verifyIdToken({
 			idToken,
 			audience: config.GOOGLE_CLIENT_ID,
 		});
-
-		const payload = ticket.getPayload();
-		if (!payload?.email) return res.status(401).json({ error: "ERR_UNAUTHORIZED" });
-
-		const email = payload.email.toLowerCase();
-		if (!payload.email_verified || !email.endsWith(ALLOWED_EMAIL_DOMAIN)) {
-			return res.status(403).json({ error: "ERR_DARTMOUTH_EMAIL_REQUIRED" });
-		}
-
-		req.user = { email, name: payload.name ?? null };
-		await createOrUpdateUser(req.user.email, req.user.name);
-
-		return next();
 	} catch {
 		return res.status(401).json({ error: "ERR_UNAUTHORIZED" });
 	}
+
+	const payload = ticket.getPayload();
+	if (!payload?.email) return res.status(401).json({ error: "ERR_UNAUTHORIZED" });
+
+	const email = payload.email.toLowerCase();
+	if (!payload.email_verified || !email.endsWith(ALLOWED_EMAIL_DOMAIN)) {
+		return res.status(403).json({ error: "ERR_DARTMOUTH_EMAIL_REQUIRED" });
+	}
+
+	req.user = { email, name: payload.name ?? null };
+	try {
+		await createOrUpdateUser(req.user.email, req.user.name);
+	} catch (error) {
+		return next(error);
+	}
+
+	return next();
 }
