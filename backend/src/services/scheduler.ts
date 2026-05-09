@@ -1,4 +1,5 @@
 import cron from "node-cron";
+import * as Sentry from "@sentry/bun";
 import config from "../config";
 import { getSubscribersFor } from "../database";
 import { fetchMenuFor, type Meal } from "./dining";
@@ -38,6 +39,16 @@ export function startScheduler(): void {
 
 					console.log(`[cron] ${meal}: sent to ${sent} recipients`);
 				} catch (err) {
+					Sentry.captureException(err, {
+						tags: {
+							job: "meal-email",
+							meal,
+						},
+					});
+					Sentry.logger.error("cron meal email failed", {
+						job: "meal-email",
+						meal,
+					});
 					console.error(`[cron] ${meal} failed`, err);
 				}
 			},

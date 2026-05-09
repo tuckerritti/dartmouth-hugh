@@ -1,6 +1,7 @@
 import cors from "cors";
 import express from "express";
 import helmet from "helmet";
+import * as Sentry from "@sentry/bun";
 import config from "./config";
 import routes from "./routes";
 import errorHandler from "./middleware/errorHandler";
@@ -22,6 +23,8 @@ app.use(
 app.use(express.json());
 
 routes(app);
+
+Sentry.setupExpressErrorHandler(app);
 
 app.use(errorHandler);
 
