@@ -1,6 +1,7 @@
 import { z } from "zod";
 
-export type Meal = "breakfast" | "lunch" | "dinner";
+export const MEALS = ["breakfast", "lunch", "dinner"] as const;
+export type Meal = (typeof MEALS)[number];
 
 const MEAL_LABEL: Record<Meal, string> = {
 	breakfast: "Breakfast",
@@ -51,15 +52,8 @@ const DiningFeedSchema = z.object({
 
 type RawItem = z.infer<typeof RawItemSchema>;
 
-type Row = {
-	mealPeriod: string;
-	location: string;
-	station: string;
-	itemName: string;
-	kind: "real" | "header";
-};
-
 export type MenuByVenue = Record<string, Record<string, string[]>>;
+export type DailyMenus = Record<Meal, MenuByVenue>;
 
 function ymd(d: Date): string {
 	const y = d.getFullYear();
@@ -87,91 +81,69 @@ function stationAllowed(location: string, station: string): boolean {
 	return location === FOCO_LOCATION && FOCO_STATIONS.has(station);
 }
 
-function filterRows(items: RawItem[], meal: Meal, date: string): Row[] {
-	const rows: Row[] = [];
-	const wantMeal = MEAL_LABEL[meal];
-
-	for (const item of items) {
-		if (!INCLUDED_CATEGORIES.has(item.menuCategory)) continue;
-		if (item.recipeCategory.some((category) => EXCLUDED_RECIPE_CATEGORIES.has(category))) {
-			continue;
-		}
-		if (COMPONENT_PICKER.test(item.itemName)) continue;
-
-		const kind: Row["kind"] = item.recipeCategory.includes("Menu Header") ? "header" : "real";
-
-		for (const availability of item.datesAvailable) {
-			if (availability.date !== date) continue;
-
-			for (const menu of availability.menus) {
-				if (menu.mealPeriod !== wantMeal) continue;
-				if (!stationAllowed(item.mainLocationLabel, menu.subLocation)) continue;
-
-				rows.push({
-					mealPeriod: menu.mealPeriod,
-					location: item.mainLocationLabel,
-					station: menu.subLocation,
-					itemName: item.itemName,
-					kind,
-				});
-			}
-		}
-	}
-
-	return rows;
+function isEntreeCandidate(item: RawItem): boolean {
+	if (!INCLUDED_CATEGORIES.has(item.menuCategory)) return false;
+	if (item.recipeCategory.some((category) => EXCLUDED_RECIPE_CATEGORIES.has(category))) return false;
+	if (COMPONENT_PICKER.test(item.itemName)) return false;
+	return true;
 }
 
 function titleCase(value: string): string {
 	return value.toLowerCase().replace(/\b\w/g, (char) => char.toUpperCase());
 }
 
-function dropRedundantHeaders(rows: Row[]): Row[] {
-	const groups = new Map<string, Row[]>();
-
-	for (const row of rows) {
-		const key = `${row.mealPeriod}|${row.location}|${row.station}`;
-		const group = groups.get(key) ?? [];
-		group.push(row);
-		groups.set(key, group);
-	}
-
-	const filtered: Row[] = [];
-	for (const group of groups.values()) {
-		const realItems = group.filter((row) => row.kind === "real");
-		if (realItems.length > 0) {
-			filtered.push(...realItems);
-			continue;
-		}
-
-		filtered.push(...group.map((row) => ({ ...row, itemName: titleCase(row.itemName) })));
-	}
-
-	return filtered;
-}
-
 function sortStrings(a: string, b: string): number {
 	return a.localeCompare(b, "en-US");
 }
 
-function rowsToMenu(rows: Row[]): MenuByVenue {
-	const grouped = new Map<string, Map<string, Set<string>>>();
+function getOrInit<K, V>(map: Map<K, V>, key: K, init: () => V): V {
+	let value = map.get(key);
+	if (value === undefined) {
+		value = init();
+		map.set(key, value);
+	}
+	return value;
+}
 
-	for (const row of rows) {
-		const stations = grouped.get(row.location) ?? new Map<string, Set<string>>();
-		const items = stations.get(row.station) ?? new Set<string>();
+type StationGroup = { items: Set<string>; headers: Set<string> };
 
-		items.add(row.itemName);
-		stations.set(row.station, items);
-		grouped.set(row.location, stations);
+function buildMenuForMeal(items: RawItem[], meal: Meal, date: string): MenuByVenue {
+	const mealLabel = MEAL_LABEL[meal];
+	const grouped = new Map<string, Map<string, StationGroup>>();
+
+	for (const item of items) {
+		if (!isEntreeCandidate(item)) continue;
+		const isHeader = item.recipeCategory.includes("Menu Header");
+
+		for (const availability of item.datesAvailable) {
+			if (availability.date !== date) continue;
+
+			for (const menu of availability.menus) {
+				if (menu.mealPeriod !== mealLabel) continue;
+				if (!stationAllowed(item.mainLocationLabel, menu.subLocation)) continue;
+
+				const stations = getOrInit(grouped, item.mainLocationLabel, () => new Map());
+				const group = getOrInit(stations, menu.subLocation, () => ({
+					items: new Set(),
+					headers: new Set(),
+				}));
+				(isHeader ? group.headers : group.items).add(item.itemName);
+			}
+		}
 	}
 
+	// Some stations publish only a "Menu Header" placeholder (e.g. "PASTA BAR")
+	// instead of itemized dishes. Fall back to those — title-cased — when no real items exist.
 	const menu: MenuByVenue = {};
 	for (const location of [...grouped.keys()].sort(sortStrings)) {
 		const stations = grouped.get(location)!;
 		menu[location] = {};
 
 		for (const station of [...stations.keys()].sort(sortStrings)) {
-			menu[location][station] = [...stations.get(station)!].sort(sortStrings);
+			const group = stations.get(station)!;
+			const names =
+				group.items.size > 0 ? [...group.items] : [...group.headers].map(titleCase);
+			menu[location][station] = names.sort(sortStrings);
 		}
 	}
 
@@ -179,10 +151,10 @@ function rowsToMenu(rows: Row[]): MenuByVenue {
 }
 
 /**
- * Fetch the day's menu from the Dartmouth Dining API and group it by venue → station.
+ * Fetch the day's menu from the Dartmouth Dining API once and group it by meal, venue, and station.
  * Filters to entree-style items at Collis Café and the configured 53 Commons stations.
  */
-export async function fetchMenuFor(meal: Meal, date: Date = new Date()): Promise<MenuByVenue> {
+export async function fetchDailyMenus(date: Date = new Date()): Promise<DailyMenus> {
 	const dateKey = ymd(date);
 	const url = `https://menu.dartmouth.edu/menuapi/mealitems?dates=${dateKey}`;
 	const res = await fetch(url);
@@ -190,5 +162,9 @@ export async function fetchMenuFor(meal: Meal, date: Date = new Date()): Promise
 	if (!res.ok) throw new Error(`dining api ${res.status}`);
 
 	const items = parseDiningFeed(await res.json());
-	return rowsToMenu(dropRedundantHeaders(filterRows(items, meal, dateKey)));
+	return {
+		breakfast: buildMenuForMeal(items, "breakfast", dateKey),
+		lunch: buildMenuForMeal(items, "lunch", dateKey),
+		dinner: buildMenuForMeal(items, "dinner", dateKey),
+	};
 }

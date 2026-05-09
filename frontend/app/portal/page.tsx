@@ -41,9 +41,7 @@ export default function PortalPage() {
 		<Stack gap="lg">
 			<Stack gap={4}>
 				<Title order={1}>Dartmouth Hugh</Title>
-				<Text c="dimmed">
-					Manage daily breakfast, lunch, and dinner emails for FoCo and Collis.
-				</Text>
+				<Text c="dimmed">Manage your daily morning email for FoCo and Collis.</Text>
 			</Stack>
 			<Paper withBorder radius="md" p="lg">
 				<Stack gap="lg">

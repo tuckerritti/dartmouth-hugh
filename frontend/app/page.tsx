@@ -36,7 +36,7 @@ export default function Home() {
 		<Stack gap="md">
 			<Title order={1}>Dartmouth Hugh</Title>
 			<Text>
-				Get a daily email with the menu at{" "}
+				Get one morning email with breakfast, lunch, and dinner from{" "}
 				<Text span fw={700}>
 					FoCo
 				</Text>{" "}
@@ -44,8 +44,7 @@ export default function Home() {
 				<Text span fw={700}>
 					Collis
 				</Text>
-				. Pick which meals you want — breakfast, lunch, or dinner — and we'll send the day's options
-				to your inbox.
+				.
 			</Text>
 			<Text size="sm" c="dimmed">
 				Sign in with your @dartmouth.edu Google account.
