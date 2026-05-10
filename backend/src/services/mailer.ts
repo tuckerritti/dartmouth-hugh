@@ -1,6 +1,8 @@
+import { readFileSync } from "node:fs";
+import Handlebars from "handlebars";
 import nodemailer from "nodemailer";
 import config from "../config";
-import { MEALS, type DailyMenus, type Meal, type MenuByVenue } from "./dining";
+import { MEALS, type DailyMenus, type Meal } from "./dining";
 
 const transporter = nodemailer.createTransport({
 	service: "gmail",
@@ -13,20 +15,84 @@ const MEAL_TITLE: Record<Meal, string> = {
 	dinner: "Dinner",
 };
 
-const HTML_ESCAPE: Record<string, string> = {
-	"&": "&amp;",
-	"<": "&lt;",
-	">": "&gt;",
-	'"': "&quot;",
-	"'": "&#39;",
+const MEAL_NUMBER: Record<Meal, string> = {
+	breakfast: "01",
+	lunch: "02",
+	dinner: "03",
 };
 
-function escapeHtml(value: string): string {
-	return value.replace(/[&<>"']/g, (char) => HTML_ESCAPE[char]);
-}
+const MEAL_TIME: Record<Meal, string> = {
+	breakfast: "7:00 - 11:00 AM",
+	lunch: "11:00 AM - 4:00 PM",
+	dinner: "4:00 - 8:30 PM",
+};
+
+const VENUE_SORT_PRIORITY = new Map<string, number>([
+	["Collis Café", 0],
+	["53 Commons", 1],
+]);
+
+type EmailItemRow = {
+	left: string;
+	right: string;
+};
+
+type EmailStation = {
+	name: string;
+	count: number;
+	itemRows: EmailItemRow[];
+};
+
+type EmailVenue = {
+	name: string;
+	stations: EmailStation[];
+};
+
+type EmailMeal = {
+	number: string;
+	title: string;
+	time: string;
+	venues: EmailVenue[];
+};
+
+type DailyDigestTemplateData = {
+	dateLabel: string;
+	meals: EmailMeal[];
+};
+
+const dailyDigestTemplate = Handlebars.compile<DailyDigestTemplateData>(
+	readFileSync(new URL("../templates/dailyDigestEmail.hbs", import.meta.url), "utf8"),
+);
 
 function sortStrings(a: string, b: string): number {
 	return a.localeCompare(b, "en-US");
+}
+
+function sortVenueNames(a: string, b: string): number {
+	const priorityA = VENUE_SORT_PRIORITY.get(a);
+	const priorityB = VENUE_SORT_PRIORITY.get(b);
+
+	if (priorityA !== undefined || priorityB !== undefined) {
+		if (priorityA === undefined) return 1;
+		if (priorityB === undefined) return -1;
+		if (priorityA !== priorityB) return priorityA - priorityB;
+	}
+
+	return sortStrings(a, b);
+}
+
+function buildItemRows(items: string[]): EmailItemRow[] {
+	const sortedItems = [...items].sort(sortStrings);
+	const rows: EmailItemRow[] = [];
+
+	for (let index = 0; index < sortedItems.length; index += 2) {
+		rows.push({
+			left: sortedItems[index],
+			right: sortedItems[index + 1] ?? "",
+		});
+	}
+
+	return rows;
 }
 
 function dateLabelFor(date: Date): string {
@@ -34,46 +100,9 @@ function dateLabelFor(date: Date): string {
 		weekday: "long",
 		month: "long",
 		day: "numeric",
+		year: "numeric",
 		timeZone: config.TIMEZONE,
 	});
-}
-
-function renderVenueSections(menu: MenuByVenue): string {
-	const sections = Object.entries(menu)
-		.sort(([a], [b]) => sortStrings(a, b))
-		.map(([venue, stations]) => {
-			const stationBlocks = Object.entries(stations)
-				.sort(([a], [b]) => sortStrings(a, b))
-				.map(([station, items]) => {
-					const itemRows = [...items]
-						.sort(sortStrings)
-						.map((item) => `<li style="margin:4px 0">${escapeHtml(item)}</li>`)
-						.join("");
-
-					return `<h4 style="margin:16px 0 6px;font-size:16px">${escapeHtml(station)}</h4><ul style="margin:0 0 12px 20px;padding:0">${itemRows}</ul>`;
-				})
-				.join("");
-
-			return `<section style="margin-top:18px"><h3 style="margin:0 0 8px;font-size:18px">${escapeHtml(venue)}</h3>${stationBlocks}</section>`;
-		})
-		.join("");
-
-	return sections || "<p><em>No menu available.</em></p>";
-}
-
-function renderMealSection(meal: Meal, menu: MenuByVenue): string {
-	return `<section style="margin-top:28px"><h2 style="margin:0 0 8px;font-size:22px">${MEAL_TITLE[meal]}</h2>${renderVenueSections(menu)}</section>`;
-}
-
-function renderHtml(menus: DailyMenus, dateLabel: string): string {
-	const sections = MEALS.map((meal) => renderMealSection(meal, menus[meal])).join("");
-
-	return `<!doctype html><html><body style="font-family:system-ui,-apple-system,BlinkMacSystemFont,'Segoe UI',sans-serif;line-height:1.45;color:#1f2933;max-width:640px;margin:0 auto;padding:24px">
-		<h1 style="margin:0 0 8px;font-size:28px">Dartmouth Dining - ${escapeHtml(dateLabel)}</h1>
-		${sections}
-		<hr style="border:0;border-top:1px solid #d8dee4;margin:28px 0 12px">
-		<p style="color:#667085;font-size:12px;margin:0">You're receiving this because you subscribed at the Dartmouth Hugh portal.</p>
-	</body></html>`;
 }
 
 export function buildDailyDigestEmail(
@@ -81,9 +110,30 @@ export function buildDailyDigestEmail(
 	date: Date = new Date(),
 ): { subject: string; html: string } {
 	const dateLabel = dateLabelFor(date);
+	const templateData: DailyDigestTemplateData = {
+		dateLabel,
+		meals: MEALS.map((meal) => ({
+			number: MEAL_NUMBER[meal],
+			title: MEAL_TITLE[meal],
+			time: MEAL_TIME[meal],
+			venues: Object.entries(menus[meal])
+				.sort(([a], [b]) => sortVenueNames(a, b))
+				.map(([name, stations]) => ({
+					name,
+					stations: Object.entries(stations)
+						.sort(([a], [b]) => sortStrings(a, b))
+						.map(([stationName, items]) => ({
+							name: stationName,
+							count: items.length,
+							itemRows: buildItemRows(items),
+						})),
+				})),
+		})),
+	};
+
 	return {
 		subject: `Daily Menus - ${dateLabel}`,
-		html: renderHtml(menus, dateLabel),
+		html: dailyDigestTemplate(templateData),
 	};
 }
 
