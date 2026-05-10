@@ -1,14 +1,36 @@
 services:
+  backend:
+    build: .
+    restart: unless-stopped
+    depends_on:
+      db:
+        condition: service_healthy
+    environment:
+      NODE_ENV: "production"
+      PORT: "4000"
+      DATABASE_HOST: "db"
+      DATABASE_PORT: "5432"
+      DATABASE_NAME: "dartmouth_hugh"
+      DATABASE_USER: "postgres"
+      DATABASE_PASSWORD: "${POSTGRES_PASSWORD:?POSTGRES_PASSWORD is required}"
+      GOOGLE_CLIENT_ID: "${GOOGLE_CLIENT_ID:?GOOGLE_CLIENT_ID is required}"
+      GMAIL_USER: "${GMAIL_USER:?GMAIL_USER is required}"
+      GMAIL_APP_PASSWORD: "${GMAIL_APP_PASSWORD:?GMAIL_APP_PASSWORD is required}"
+      EMAIL_SEND_CRON: "${EMAIL_SEND_CRON:-0 7 * * *}"
+      FRONTEND_ORIGIN: "${FRONTEND_ORIGIN:?FRONTEND_ORIGIN is required}"
+      SENTRY_DSN: "${SENTRY_DSN:-}"
+    ports:
+      - "${BACKEND_PORT:-4000}:4000"
+
   db:
     image: postgres:18-alpine
-    container_name: dartmouth-hugh-postgres
     restart: unless-stopped
     environment:
-      POSTGRES_USER: postgres
-      POSTGRES_PASSWORD: postgres
-      POSTGRES_DB: dartmouth_hugh
+      POSTGRES_USER: "postgres"
+      POSTGRES_PASSWORD: "${POSTGRES_PASSWORD:?POSTGRES_PASSWORD is required}"
+      POSTGRES_DB: "dartmouth_hugh"
     ports:
-      - "5432:5432"
+      - "127.0.0.1:5432:5432"
     volumes:
       - postgres_data:/var/lib/postgresql
     healthcheck:
