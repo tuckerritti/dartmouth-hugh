@@ -1,0 +1,184 @@
+<!doctype html>
+<html>
+	<head>
+		<meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
+		<title>Dartmouth Hugh Today's Menus</title>
+	</head>
+	<body
+		style="
+			margin: 0;
+			padding: 0;
+			background: #fafaf7;
+			font-family:
+				&quot;Inter Tight&quot;,
+				Inter,
+				-apple-system,
+				BlinkMacSystemFont,
+				&quot;Segoe UI&quot;,
+				system-ui,
+				sans-serif;
+			color: #15171a;
+			line-height: 1.5;
+			-webkit-text-size-adjust: 100%;
+		"
+	>
+		<div style="display: none; max-height: 0; overflow: hidden; opacity: 0; color: transparent">
+			Today's Dartmouth Dining menu for {{dateLabel}}.
+		</div>
+
+		<div style="max-width: 640px; margin: 0 auto; padding: 40px; background: #ffffff">
+			<div style="margin: 0 0 38px">
+				<p style="margin: 0 0 28px; font-size: 11px; line-height: 1.6; color: #7a7d83">
+					Dartmouth Hugh
+				</p>
+				<h1 style="margin: 0; font-size: 44px; line-height: 1.05; font-weight: 600; color: #15171a">
+					Today's Menus
+				</h1>
+				<p style="margin: 12px 0 0; font-size: 16px; line-height: 1.5; color: #3a3d42">
+					{{dateLabel}}
+				</p>
+			</div>
+
+			{{#each meals}}
+			<div style="margin: 0 0 26px; padding: 18px 0 0; border-top: 1px solid #e6e4dc">
+				<table
+					role="presentation"
+					width="100%"
+					cellpadding="0"
+					cellspacing="0"
+					style="border-collapse: collapse"
+				>
+					<tr>
+						<td style="width: 164px; vertical-align: top; padding: 3px 28px 0 0">
+							<div style="font-size: 13px; line-height: 1.4; font-weight: 500; color: #7a7d83">
+								{{number}}
+							</div>
+						</td>
+						<td style="vertical-align: top; padding: 0">
+							<h2
+								style="
+									margin: 0;
+									font-size: 28px;
+									line-height: 1.15;
+									font-weight: 600;
+									color: #15171a;
+								"
+							>
+								{{title}}
+							</h2>
+							<p style="margin: 4px 0 8px; font-size: 12px; line-height: 1.5; color: #7a7d83">
+								{{time}}
+							</p>
+
+						</td>
+					</tr>
+					{{#if venues}}
+					{{#each venues}}
+					<tr>
+						<td style="width: 164px; vertical-align: top; padding: 14px 28px 0 0">
+							<div
+								style="
+									font-size: 13px;
+									line-height: 1.45;
+									font-weight: 500;
+									color: #7a7d83;
+									text-transform: uppercase;
+								"
+							>
+								{{name}}
+							</div>
+						</td>
+						<td style="vertical-align: top; padding: 14px 0 0">
+							{{#each stations}}
+							<div style="margin: 0 0 {{#if @last}}0{{else}}18{{/if}}px">
+								<div style="margin: 0 0 7px">
+									<span
+										style="font-size: 14px; line-height: 1.5; font-weight: 600; color: #15171a"
+									>
+										{{name}}
+									</span>
+									<span style="margin-left: 10px; font-size: 12px; line-height: 1.5; color: #a8a9ac">
+										{{count}}
+									</span>
+								</div>
+
+								<table
+									role="presentation"
+									width="100%"
+									cellpadding="0"
+									cellspacing="0"
+									style="border-collapse: collapse"
+								>
+									{{#each itemRows}}
+									<tr>
+										<td
+											style="
+												width: 50%;
+												vertical-align: top;
+												padding: 2px 18px 5px 0;
+												font-size: 15px;
+												line-height: 1.45;
+												color: #3a3d42;
+											"
+										>
+											{{left}}
+										</td>
+										<td
+											style="
+												width: 50%;
+												vertical-align: top;
+												padding: 2px 0 5px 18px;
+												font-size: 15px;
+												line-height: 1.45;
+												color: #3a3d42;
+											"
+										>
+											{{right}}
+										</td>
+									</tr>
+									{{/each}}
+								</table>
+							</div>
+							{{/each}}
+						</td>
+					</tr>
+					{{/each}}
+					{{else}}
+					<tr>
+						<td style="width: 164px; vertical-align: top; padding: 16px 28px 0 0"></td>
+						<td style="vertical-align: top; padding: 16px 0 0">
+							<p style="margin: 0; font-size: 14px; line-height: 1.5; color: #7a7d83">
+								<em>No menu available.</em>
+							</p>
+						</td>
+					</tr>
+					{{/if}}
+				</table>
+			</div>
+			{{/each}}
+
+			<div style="margin: 46px 0 0; padding: 18px 0 0; border-top: 1px solid #e6e4dc">
+				<table
+					role="presentation"
+					width="100%"
+					cellpadding="0"
+					cellspacing="0"
+					style="border-collapse: collapse"
+				>
+					<tr>
+						<td style="vertical-align: top; padding: 0">
+							<p style="margin: 0; font-size: 11px; line-height: 1.6; color: #a8a9ac">
+								You subscribed at hugh.tuckerritti.com.
+							</p>
+						</td>
+						<td style="vertical-align: top; padding: 0; text-align: right">
+							<p style="margin: 0; font-size: 11px; line-height: 1.6; color: #a8a9ac">
+								Made with &#10084;&#65039; at Dartmouth College
+							</p>
+						</td>
+					</tr>
+				</table>
+			</div>
+		</div>
+	</body>
+</html>
