@@ -24,7 +24,7 @@ export default function Home() {
 
 	if (me || loading) {
 		return (
-			<Stack gap="md">
+			<Stack align="center" gap="md" ta="center">
 				<Text size="sm" c="dimmed" ta="center">
 					{me ? "Redirecting..." : "Loading..."}
 				</Text>
@@ -33,7 +33,7 @@ export default function Home() {
 	}
 
 	return (
-		<Stack gap="md">
+		<Stack align="center" gap="md" ta="center">
 			<Title order={1}>Dartmouth Hugh</Title>
 			<Text>
 				Get one morning email with breakfast, lunch, and dinner from{" "}
