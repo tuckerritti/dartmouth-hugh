@@ -30,7 +30,7 @@ export default function PortalPage() {
 	if (loading || !token || !me) {
 		return (
 			<Stack gap="lg">
-				<Text size="sm" c="dimmed">
+				<Text size="sm" c="dimmed" ta="center">
 					{loading ? "Loading..." : "Redirecting..."}
 				</Text>
 			</Stack>
