@@ -2,7 +2,8 @@
 
 import { useRouter } from "next/navigation";
 import { useCallback, useEffect } from "react";
-import { Alert, Stack, Text, Title } from "@mantine/core";
+import { Alert, Stack, Text } from "@mantine/core";
+import { BrandTitle } from "@/components/BrandTitle";
 import { GoogleSignIn } from "@/components/GoogleSignIn";
 import { useAuth } from "@/components/AuthProvider";
 
@@ -34,7 +35,7 @@ export default function Home() {
 
 	return (
 		<Stack align="center" gap="md" ta="center">
-			<Title order={1}>Dartmouth Hugh</Title>
+			<BrandTitle />
 			<Text>
 				Get one morning email with breakfast, lunch, and dinner from{" "}
 				<Text span fw={700}>
