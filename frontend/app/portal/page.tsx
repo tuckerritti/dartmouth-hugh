@@ -1,9 +1,10 @@
 "use client";
 import { useRouter } from "next/navigation";
 import { useEffect } from "react";
-import { Button, Group, Paper, Stack, Text, Title } from "@mantine/core";
+import { Button, Group, Paper, Stack, Text } from "@mantine/core";
 import { LogOut } from "lucide-react";
 import { useAuth } from "@/components/AuthProvider";
+import { BrandTitle } from "@/components/BrandTitle";
 import { PreferencesForm } from "@/components/PreferencesForm";
 
 function PortalCredit() {
@@ -40,7 +41,7 @@ export default function PortalPage() {
 	return (
 		<Stack gap="lg">
 			<Stack gap={4}>
-				<Title order={1}>Dartmouth Hugh</Title>
+				<BrandTitle />
 				<Text c="dimmed">Manage your daily morning email for FoCo and Collis.</Text>
 			</Stack>
 			<Paper withBorder radius="md" p="lg">
