@@ -25,7 +25,7 @@ export default function Home() {
 	if (me || loading) {
 		return (
 			<Stack gap="md">
-				<Text size="sm" c="dimmed">
+				<Text size="sm" c="dimmed" ta="center">
 					{me ? "Redirecting..." : "Loading..."}
 				</Text>
 			</Stack>
