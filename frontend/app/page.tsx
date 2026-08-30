@@ -39,11 +39,7 @@ export default function Home() {
 			<Text>
 				Get one morning email with breakfast, lunch, and dinner from{" "}
 				<Text span fw={700}>
-					FoCo
-				</Text>{" "}
-				and{" "}
-				<Text span fw={700}>
-					Collis
+					FoCo (1953 Commons)
 				</Text>
 				.
 			</Text>

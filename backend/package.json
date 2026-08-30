@@ -6,6 +6,7 @@
 	"scripts": {
 		"dev": "bun --preload ./src/instrument.ts --watch src/app.ts",
 		"start": "bun --preload ./src/instrument.ts src/app.ts",
+		"test": "bun test",
 		"typecheck": "tsc --noEmit",
 		"lint": "eslint .",
 		"format": "prettier --write .",

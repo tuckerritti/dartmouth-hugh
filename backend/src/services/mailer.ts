@@ -27,11 +27,6 @@ const MEAL_TIME: Record<Meal, string> = {
 	dinner: "4:00 - 8:30 PM",
 };
 
-const VENUE_SORT_PRIORITY = new Map<string, number>([
-	["Collis Café", 0],
-	["53 Commons", 1],
-]);
-
 type EmailItemRow = {
 	left: string;
 	right: string;
@@ -66,19 +61,6 @@ const dailyDigestTemplate = Handlebars.compile<DailyDigestTemplateData>(
 
 function sortStrings(a: string, b: string): number {
 	return a.localeCompare(b, "en-US");
-}
-
-function sortVenueNames(a: string, b: string): number {
-	const priorityA = VENUE_SORT_PRIORITY.get(a);
-	const priorityB = VENUE_SORT_PRIORITY.get(b);
-
-	if (priorityA !== undefined || priorityB !== undefined) {
-		if (priorityA === undefined) return 1;
-		if (priorityB === undefined) return -1;
-		if (priorityA !== priorityB) return priorityA - priorityB;
-	}
-
-	return sortStrings(a, b);
 }
 
 function buildItemRows(items: string[]): EmailItemRow[] {
@@ -117,7 +99,7 @@ export function buildDailyDigestEmail(
 			title: MEAL_TITLE[meal],
 			time: MEAL_TIME[meal],
 			venues: Object.entries(menus[meal])
-				.sort(([a], [b]) => sortVenueNames(a, b))
+				.sort(([a], [b]) => sortStrings(a, b))
 				.map(([name, stations]) => ({
 					name,
 					stations: Object.entries(stations)

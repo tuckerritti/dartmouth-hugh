@@ -42,7 +42,7 @@ export default function PortalPage() {
 		<Stack gap="lg">
 			<Stack gap={4}>
 				<BrandTitle />
-				<Text c="dimmed">Manage your daily morning email for FoCo and Collis.</Text>
+				<Text c="dimmed">Manage your daily morning email for FoCo (1953 Commons).</Text>
 			</Stack>
 			<Paper withBorder radius="md" p="lg">
 				<Stack gap="lg">
