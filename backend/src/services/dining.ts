@@ -18,6 +18,9 @@ const FOCO_STATIONS = new Set([
 	"Soups",
 ]);
 
+const NOISE_ITEM =
+	/^(?:A9 )?(?:Bread|Cheese(?:cake)?|Cookie|Corn|Guacamole|Hummus|Mayonnaise|Oatmeal Toppings|Pickle|Pita Bread Chips|Potato(?:es)?|Rice|Roll|Salad Fruit|Salsa|Sauce|Sour Cream|Vegetable)\b|^SF (?:Cheese|Eggs|Meats|Vegetables) for\b/i;
+
 const NutrisliceFoodSchema = z.object({
 	name: z.string().trim().min(1),
 });
@@ -134,7 +137,7 @@ function buildMenuForMeal(feed: NutrisliceMenu, meal: Meal, dateKey: string): Me
 				`nutrislice ${meal} response contains food for unknown station ${item.station_id}`,
 			);
 		}
-		if (!FOCO_STATIONS.has(stationName)) continue;
+		if (!FOCO_STATIONS.has(stationName) || NOISE_ITEM.test(item.food.name)) continue;
 
 		getOrInit(grouped, stationName, () => new Set()).add(item.food.name);
 	}
